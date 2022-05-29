@@ -9,6 +9,4 @@ app.use(express.json());
 
 app.use(accountRouter);
 
-const port = parseInt(`${process.env.PORT}`)
-app.listen(port);
-console.log(`Running on port ${port}`);
+export default app;
