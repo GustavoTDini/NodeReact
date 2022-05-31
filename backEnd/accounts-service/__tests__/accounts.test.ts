@@ -1,5 +1,4 @@
 import request from "supertest";
-import { IAccount } from "../src/models/account";
 import app from './../src/app'
 
 describe('Testando rotas do accounts', () =>{
@@ -13,12 +12,11 @@ describe('Testando rotas do accounts', () =>{
     })
 
     it('POST /accounts/ - Deve retornar status 201', async () =>{
-        const payload: IAccount = {
+        const payload = {
             id: 1,
             name: 'Gustavo',
             email: 'e.mail@email.com',
             password: '123456',
-            status: 100,
         };
 
         const resultado = await request(app)
@@ -42,6 +40,49 @@ describe('Testando rotas do accounts', () =>{
         expect(resultado.status).toEqual(422);
     })
 
+    it('PATCH /accounts/:id - Deve retornar status 200', async () => {
+        const payload = {
+            name: 'Gustavo Dini',
+            email: 'e.mail@email.com',
+            password: '123456',
+        };
+
+        const resultado = await request(app)
+            .patch('/accounts/1')
+            .send(payload);
+
+        expect(resultado.status).toEqual(200);
+        expect(resultado.body.id).toEqual(1);
+    })
+
+    it('PATCH /accounts/:id - Deve retornar status 404', async () => {
+        const payload = {
+            name: 'Gustavo Dini',
+            email: 'e.mail@email.com',
+            password: '123456',
+        };
+
+        const resultado = await request(app)
+            .patch('/accounts/-1')
+            .send(payload);
+
+        expect(resultado.status).toEqual(404);
+    })
+
+    it('PATCH /accounts/:id - Deve retornar status 400', async () => {
+        const payload = {
+            name: 'Gustavo Dini',
+            email: 'e.mail@email.com',
+            password: '123456',
+        };
+
+        const resultado = await request(app)
+            .patch('/accounts/abc')
+            .send(payload);
+
+        expect(resultado.status).toEqual(400);
+    })
+
     it('GET /accounts/:id - Deve retornar status 200', async () =>{
         const resultado = await request(app)
             .get('/accounts/1');
@@ -52,7 +93,7 @@ describe('Testando rotas do accounts', () =>{
 
     it('GET /accounts/:id - Deve retornar status 404', async () =>{
         const resultado = await request(app)
-            .get('/accounts/6');
+            .get('/accounts/-1');
 
         expect(resultado.status).toEqual(404);
     })
