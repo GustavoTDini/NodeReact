@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import { AccountStatus } from './accountsStatus';
 
 export interface IAccount{
@@ -7,43 +6,5 @@ export interface IAccount{
     email: string,
     password: string,
     status: AccountStatus,
+    domain: string,
 };
-
-const accountSchema = Joi.object({
-    id: Joi.number()
-        .integer()
-        .min(1),
-    name: Joi.string()
-        .min(3)
-        .max(150)
-        .required(),
-    email: Joi.string()
-        .email()
-        .required()
-        .min(8)
-        .max(150),
-    password: Joi.string()
-        .alphanum()
-        .min(6)
-        .max(150)
-        .required(),
-    status: Joi.number()
-        .integer()
-        .min(100)
-        .max(400)
-});
-
-const loginSchema = Joi.object({
-    email: Joi.string()
-        .email()
-        .required()
-        .min(8)
-        .max(150),
-    password: Joi.string()
-        .alphanum()
-        .min(6)
-        .max(150)
-        .required()
-});
-
-export {accountSchema, loginSchema};
