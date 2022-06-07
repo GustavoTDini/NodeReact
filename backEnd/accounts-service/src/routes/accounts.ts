@@ -1,6 +1,6 @@
 import { Router } from "express";
 import accountsControler from "../controllers/accounts";
-import {validateAccount, validateLogin} from "./validate";
+import {validateAccount, validateLogin, validateUpdate} from "./validate";
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.get('/accounts/:id', accountsControler.getAccount);
 
 router.post('/accounts/', validateAccount, accountsControler.addAccount)
 
-router.patch('/accounts/:id', validateAccount, accountsControler.setAccount)
+router.patch('/accounts/:id', validateUpdate, accountsControler.setAccount)
 
 router.post('/accounts/login/', validateLogin, accountsControler.loginAccount)
 

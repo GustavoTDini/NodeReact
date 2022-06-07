@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { accountSchema, loginSchema } from "../models/accountsSchema";
+import { accountSchema, loginSchema, updateSchema } from "../models/accountsSchema";
 import Joi from "joi";
 
 function validateSchema(schema: Joi.ObjectSchema<any>, req: Request, res: Response, next: any){
@@ -22,4 +22,8 @@ function validateLogin(req: Request, res: Response, next: any){
     return validateSchema(loginSchema, req, res, next)
 }
 
-export {validateAccount, validateLogin};
+function validateUpdate(req: Request, res: Response, next: any){
+    return validateSchema(updateSchema, req, res, next)
+}
+
+export {validateAccount, validateLogin, validateUpdate};

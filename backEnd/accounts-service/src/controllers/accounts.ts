@@ -1,11 +1,10 @@
 import{Request, Response} from 'express';
 import {IAccount} from '../models/account'
-import AccountRepository, {AccountModel} from '../models/accountModel';
-
-const accounts: IAccount[] = [];
+import accountRepository from '../models/accountModel';
+import auth from '../auth';
 
 async function getAccounts(req: Request, res: Response, next: any){
-    const accounts = await AccountRepository.findAll<AccountModel>();
+    const accounts = await accountRepository.findAllAccounts();
     
     res.json(accounts.map(item =>{
         item.password = '';
@@ -14,17 +13,18 @@ async function getAccounts(req: Request, res: Response, next: any){
     res.status(200).end();
 }
 
-function getAccount(req: Request, res: Response, next: any){
+async function getAccount(req: Request, res: Response, next: any){
     try{
         const id = parseInt(req.params.id);
         if (!id) {
             throw new Error('Id is not a number!');
         }
-        const index = accounts.findIndex(item => item.id == id);
-        if (index === -1){
+        const account = await accountRepository.findAccount(id) as IAccount;
+        if (account === null){
             return res.status(404).end()
         } else{
-            res.json(accounts[index])
+            account.password = '';
+            res.json(account)
             res.status(200).end();
         }
     }catch(error){
@@ -33,10 +33,13 @@ function getAccount(req: Request, res: Response, next: any){
     }
 }
 
-function addAccount(req: Request, res: Response, next: any){
+async function addAccount(req: Request, res: Response, next: any){
     try{
         const newAccount = req.body as IAccount;
-        accounts.push(newAccount);
+        newAccount.password = auth.hashpassword(newAccount.password);
+        const result = await accountRepository.addAccount(newAccount);
+        newAccount.password = '';
+        newAccount.id = result.id;
         res.status(201).json(newAccount);
     }catch(error){
         console.log(error);
@@ -44,26 +47,17 @@ function addAccount(req: Request, res: Response, next: any){
     }
 }
 
-function setAccount(req: Request, res: Response, next: any){
+async function setAccount(req: Request, res: Response, next: any){
     try{
         const accountId = parseInt(req.params.id)
         if (!accountId) {
             throw new Error('Id is not a number!');
         }
         const accountParams = req.body as IAccount;
-        const index = accounts.findIndex(item => item.id == accountId);
-        if (index === -1) {
-            return res.status(404).end()
-        }
-        const originalAccount = accounts[index];
-        if (accountParams.name) {
-            originalAccount.name = accountParams.name;
-        }
-        if (accountParams.password) {
-            originalAccount.password = accountParams.password;
-        }
-        accounts[index] = originalAccount;
-        res.status(200).json(originalAccount);
+        accountParams.password = auth.hashpassword(accountParams.password);
+        const updatedAccount = await accountRepository.setAccount(accountId, accountParams);
+        updatedAccount.password = '';
+        res.status(200).json(updatedAccount);
         
     
     }catch(error){
@@ -75,10 +69,6 @@ function setAccount(req: Request, res: Response, next: any){
 function loginAccount(req: Request, res: Response, next: any){
     try{
         const loginParams = req.body as IAccount;
-        const index = accounts.findIndex(item => item.email === loginParams.email && item.password === loginParams.password );
-        if (index === -1){
-            return res.status(401).end()
-        }
         res.json({auth: true, token: {}});
     }catch(error){
         console.log(error);
