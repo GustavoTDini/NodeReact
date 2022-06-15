@@ -66,10 +66,18 @@ async function setAccount(req: Request, res: Response, next: any){
     }
 }
 
-function loginAccount(req: Request, res: Response, next: any){
+async function loginAccount(req: Request, res: Response, next: any){
     try{
         const loginParams = req.body as IAccount;
-        res.json({auth: true, token: {}});
+        const account = await accountRepository.findByEmail(loginParams.email);
+        if (account !== null){
+            const isValid = await auth.comparePassword(loginParams.password, account.password);
+            if (isValid){
+                const token = auth.sign(account.id!);
+                res.json({auth: true, token});
+            }
+        } 
+        return res.status(401).end();   
     }catch(error){
         console.log(error);
         res.status(400).end();

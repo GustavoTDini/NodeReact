@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { accountSchema, loginSchema, updateSchema } from "../models/accountsSchema";
 import Joi from "joi";
+import { access } from "fs";
+import auth from "../auth";
 
 function validateSchema(schema: Joi.ObjectSchema<any>, req: Request, res: Response, next: any){
     const{error} = schema.validate(req.body);
@@ -26,4 +28,22 @@ function validateUpdate(req: Request, res: Response, next: any){
     return validateSchema(updateSchema, req, res, next)
 }
 
-export {validateAccount, validateLogin, validateUpdate};
+function validateAuth(req: Request, res: Response, next: any){
+    try {
+        const token = req.headers['x-access-token'] as string;
+        if (!token){
+            res.status(401).end();
+        }
+        const payload = auth.verify(token);
+        if (!payload){
+            res.status(401).end();
+        }
+        res.locals.payload = payload;
+        next();
+    } catch (error) {
+        console.log(`Validate Auth: ${error}`);
+        res.status(400).end();
+    }
+}
+
+export {validateAccount, validateLogin, validateUpdate, validateAuth};

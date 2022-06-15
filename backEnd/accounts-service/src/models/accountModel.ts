@@ -42,6 +42,10 @@ async function findAllAccounts(){
     return accountModel.findAll<AccountModel>();
 }
 
+async function findByEmail(emailFilter: string){
+    return accountModel.findOne<AccountModel>({where:{email:emailFilter}});
+}
+
 async function findAccount(id: number){
     return accountModel.findByPk<AccountModel>(id)
 }
@@ -66,4 +70,4 @@ async function setAccount(id: number, account: IAccount) {
 
 }
 
-export default { findAllAccounts, findAccount, addAccount, setAccount }
+export default { findAllAccounts, findAccount, addAccount, setAccount, findByEmail }
